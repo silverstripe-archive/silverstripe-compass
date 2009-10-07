@@ -18,7 +18,8 @@ class CompassTheme extends Object {
 		);
 		 
 		$gempath = self::gem_path();
-		$process = proc_open("HOME='$gempath' GEM_HOME='$gempath' " . (@$_GET['flush'] ? "FLUSH={$_GET['flush']} " : '') . $cmd, $descriptorspec, $pipes);
+		$flush = @$_GET['flush'] ? sprintf("FLUSH=%s ", escapeshellarg($_GET['flush'])) : '';
+		$process = proc_open("HOME='$gempath' GEM_HOME='$gempath' " . $flush . $cmd, $descriptorspec, $pipes);
 		
 		$stdout = "";
 		$stderr = "";

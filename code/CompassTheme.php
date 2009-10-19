@@ -139,3 +139,10 @@ class CompassTheme extends Object {
 		chdir($orig);
 	}
 }
+
+// If we are in dev mode, or flush is called, we use compass to rebuild the css from the sass. We do this on ContentControllers only, to avoid some issues with tests, etc.
+class CompassTheme_RebuildDecorator extends DataObjectDecorator {
+	function contentcontrollerInit($controller) {
+		if (Director::isDev() || @$_GET['flush']) CompassTheme::rebuild();
+	}
+}

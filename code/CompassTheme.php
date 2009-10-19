@@ -19,7 +19,10 @@ class CompassTheme extends Object {
 
 	static function error($message) {
 		// If errors_are_errors is null, work out if it should be true or false based on server mode
-		if (self::$errors_are_errors === null) self::$errors_are_errors = Director::isDev();
+		if (self::$errors_are_errors === null) {
+			$runningTest = class_exists('SapphireTest',false) && SapphireTest::is_running_test();
+			self::$errors_are_errors = Director::isDev() && !$runningTest;
+		}
 
 		// Then raise the actual error (if errors are errors)
 		if (self::$errors_are_errors) user_error('Compass Error:<br />' . preg_replace('/[\r\n]+/', '<br />', $message), E_USER_ERROR);

@@ -8,7 +8,8 @@
 class CSSAbsolutePathRewriter extends Requirements_Backend {
 	
 	function css($file, $media = null) {
-		return parent::css(Director::is_absolute($file) ? $file : $this->baseRewrite($file), $media);
+		$isurl = (bool)preg_match('{^\w+://}', $file);
+		return parent::css($isurl ? $file : $this->baseRewrite($file), $media);
 	}
 
 	function customCSS($script, $uniquenessID = null) {

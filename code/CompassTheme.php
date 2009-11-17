@@ -98,7 +98,7 @@ class CompassTheme extends Object {
 	
 	static function rebuild() {
 		// Check if ruby is present
-		$ver = `ruby --version`;
+		$ver = `which ruby`;
 		if (!$ver) return self::error(
 			"Ruby isn't present, and Compass can't work without it.\n".
 			"Set CompassTheme::\$errors_are_errors to false to ignore if you aren't using compass"

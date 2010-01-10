@@ -62,6 +62,6 @@ class CSSAbsolutePathRewriter extends Requirements_Backend {
 			}
 		}
 		
-		return preg_replace("(</head[^>]*>)", $requirements . "\\1", $content);
+		return preg_replace("/(<\/head[^>]*>)/i", $requirements . "\\1", $content);
 	}
 }

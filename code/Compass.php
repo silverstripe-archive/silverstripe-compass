@@ -11,6 +11,11 @@ class Compass extends Controller {
 	 */
 	static $errors_are_errors = null;
 	
+	/**
+	 * Set to true to force no automatic rebuilding, even if isDev() is true or flush is passed and the gems are all available
+	 */ 
+	static $force_no_rebuild = false;
+	
 	/** What gems are required for compass to work? */
 	static $required_gems = array('yard', 'maruku', 'haml', 'compass', 'compass-colors');
 	
@@ -264,6 +269,7 @@ relative_assets = true
 // If we are in dev mode, or flush is called, we use compass to rebuild the css from the sass. We do this on ContentControllers only, to avoid some issues with tests, etc.
 class Compass_RebuildDecorator extends DataObjectDecorator {
 	function contentcontrollerInit($controller) {
+		if (Compass::$force_no_rebuild) return;
 		if (Director::isDev() || @$_GET['flush']) singleton('Compass')->rebuild();
 	}
 }

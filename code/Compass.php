@@ -15,9 +15,21 @@ class Compass extends Controller {
 	 * Set to true to force no automatic rebuilding, even if isDev() is true or flush is passed and the gems are all available
 	 */ 
 	static $force_no_rebuild = false;
-	
+
+	/**
+	 * Which version of sass should we use, 2 or 3? 3 is currently not actually supported, and is here as a stub
+	 */
+	static $sass_version = 2;
+
 	/** What gems are required for compass to work? */
-	static $required_gems = array('yard', 'maruku', 'haml', 'compass', 'compass-colors');
+	static $required_gems = array(
+		2 => array(
+			'yard', 'maruku', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors'
+		),
+		'latest' => array(
+			'yard', 'maruku', 'haml', 'compass'
+		)
+	);
 	
 	/** Internal cache variable - is the version of rubygems currently available good enough? */
 	static $check_gems_result = null;
@@ -27,8 +39,9 @@ class Compass extends Controller {
 			
 			self::$check_gems_result = true;
 			
-			foreach (self::$required_gems as $gem) {
-				if ($error = Rubygems::require_gem($gem)) self::$check_gems_result = $error;
+			foreach (self::$required_gems[self::$sass_version] as $gem => $version) {
+				if (is_numeric($gem)) { $gem = $version; $version = null; }
+				if ($error = Rubygems::require_gem($gem, $version)) self::$check_gems_result = $error;
 			}
 		}
 		
@@ -142,7 +155,7 @@ relative_assets = true
 				
 				$to_ = $to.DIRECTORY_SEPARATOR.preg_replace('/.css$/', '.sass', $entry);
 				
-				$res = Rubygems::run('haml', 'css2sass', null, "'$from_' '$to_'", $out, $err);
+				$res = Rubygems::run(self::$required_gems[self::$sass_version], 'css2sass', "'$from_' '$to_'", $out, $err);
 				
 				if ($res != 0) {
 					echo "\nError converting ".Director::makeRelative($from_)."\n\nError from css2sass was:\n$err";
@@ -239,7 +252,7 @@ relative_assets = true
 		$orig = getcwd();
 		
 		chdir($dir);
-		$code = Rubygems::run("compass", "compass", null, @$_GET['flush'] ? " --force" : "", $out, $err);
+		$code = Rubygems::run(self::$required_gems[self::$sass_version], "compass", @$_GET['flush'] ? " --force" : "", $out, $err);
 		chdir($orig);
 		
 		if ($code !== 0) return self::error($err);	
@@ -257,8 +270,9 @@ relative_assets = true
 	 * Note that errors get output independent of this argument - use errors_are_errors = false to suppress them.
 	 */
 	function updategems($verbose = false) {
-		foreach (self::$required_gems as $gem) {
-			if ($error = Rubygems::require_gem($gem, true)) echo $error;
+		foreach (self::$required_gems[self::$sass_version] as $gem => $version) {
+			if (is_numeric($gem)) { $gem = $version; $version = null; }
+			if ($error = Rubygems::require_gem($gem, $version, true)) echo $error;
 		}
 		
 		if ($verbose) echo "\nGem update succesfull\n";

@@ -71,10 +71,11 @@ class Rubygems extends Object {
 	/**
 	 * Make sure a gem is available
 	 * @param $gem string - the name of the gem to install
+	 * @param $version string - the specific version to install
 	 * @param $tryupdating bool - if the gem is present, check for update? (hits the internet, so slow)
 	 * @return null | string - an error string on error, nothing on success
 	 */
-	static function require_gem($gem, $tryupdating = false) {
+	static function require_gem($gem, $version = null, $tryupdating = false) {
 		// Check that ruby exists
 		if (self::$ruby_ok === null) self::$ruby_ok = (bool)`which ruby`;
 		
@@ -91,31 +92,39 @@ class Rubygems extends Object {
 
 		if (!self::$gem_version_ok) return "Rubygems is too old. You have version $ver, but we need at least version 1.2. Please upgrade.";
 		
+		$veropt = $version ? "-v '$version'" : '';
+
 		// See if the gem exists. If not, try adding it
-		self::_run("gem list -i $gem", $out, $err);
-		
-		if (trim($out) != 'true') {
-			$code = self::_run("gem install $gem --no-rdoc --no-ri", $out, $err);
+		self::_run("gem list -i $gem $veropt", $out, $err);
+
+		if (trim($out) != 'true' || $tryupdating) {
+			$code = self::_run("gem install $gem $veropt --no-rdoc --no-ri", $out, $err);
 			if ($code !== 0) return "Could not install required gem $gem. Either manually install, or repair error. Error message was: $err";
-		}
-		else if ($tryupdating) {
-			$code = self::_run("gem update $gem --no-rdoc --no-ri", $out, $err);
-			if ($code !== 0) return "Could not update gem $gem. Error message was: $err";
 		}
 	}
 	
 	/**
 	 * Execute a command provided by a gem
-	 * @param $gem string - the name of the gem providing the command
+	 * @param $gem string | array - the name of the gem, or an array of names of gems, possibly associated with versions, to require
 	 * @param $command string - the name of the command
-	 * @param $ver string - the version requirement for the gem, or null for any version
 	 * @param $args string - arguments to pass to the command
 	 * @param $out reference to string - stdout result of the command
 	 * @param $err reference to string - stderr result of the command
 	 * @return int - process exit code, or -1 if the process couldn't be executed
 	 */
-	static function run($gem, $command, $ver=null, $args="", &$out, &$err) {
-		if (!$ver) $ver = '>= 0';
-		return self::_run("ruby -rubygems -e 'gem \"$gem\", \"$ver\"' -e 'load \"$command\"' -- $args", $out, $err);
+	static function run($gems, $command, $args="", &$out, &$err) {
+		$reqs = array();
+
+		if (is_string($gems)) $reqs[] = "-e 'gem \"$gem\", \">= 0\"'";
+		else {
+			foreach ($gems as $gem => $version) {
+				if (is_numeric($gem)) { $gem = $version; $version = '>= 0'; }
+				$reqs[] = "-e 'gem \"$gem\", \"$version\"'";
+			}
+		}
+
+		$reqs = implode(' ', $reqs);
+
+		return self::_run("ruby -rubygems $reqs -e 'load \"$command\"' -- $args", $out, $err);
 	}
 }

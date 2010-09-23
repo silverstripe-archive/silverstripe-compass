@@ -30,7 +30,7 @@ sapphire/sake dev/compass/convert --theme=blackcandy
 
 ###### That's it
 
-In dev mode, whenever flush is passed as a get variable, or when you call sapphire/sake dev/compass/rebuilt called, Compass is called to rebuild your css
+In dev mode, whenever flush is passed as a get variable, or when you call sapphire/sake dev/compass/rebuild called, Compass is called to rebuild your css
 
 By default Compass will only update css for sass files that have changed. If flush is passed as a get variable, we force the recompile of all css files.
 

@@ -280,10 +280,20 @@ relative_assets = true
 	
 }
 
-// If we are in dev mode, or flush is called, we use compass to rebuild the css from the sass. We do this on ContentControllers only, to avoid some issues with tests, etc.
+/**
+ * Hook in logic to potentially rebuild css from compass files when a request is received.
+ *
+ * Rebuild on request happens if sapphire is in dev mode or flush is passed as a GET variable, except when
+ * Compass::$force_no_rebuild is true, or we're currently running a test
+ */
 class Compass_RebuildDecorator extends DataObjectDecorator {
 	function contentcontrollerInit($controller) {
+		// Don't auto-rebuild if explicitly disabled
 		if (Compass::$force_no_rebuild) return;
+		// Don't auto-rebuild in test mode
+		$runningTest = class_exists('SapphireTest',false) && SapphireTest::is_running_test();
+		if ($runningTest) return;
+		// If we are in dev mode, or flush called, auto-rebuild
 		if (Director::isDev() || @$_GET['flush']) singleton('Compass')->rebuild();
 	}
 }

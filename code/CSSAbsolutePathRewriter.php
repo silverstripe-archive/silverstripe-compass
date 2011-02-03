@@ -2,8 +2,8 @@
 
 /**
  * Rewrites CSS files to replace BASE with the current base tag
- * @author hamish
  *
+ * @package compass
  */
 class CSSAbsolutePathRewriter extends Requirements_Backend {
 	

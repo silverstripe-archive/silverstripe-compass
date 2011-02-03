@@ -1,37 +1,48 @@
 <?php
 
+/**
+ * @package compass
+ */
 class Compass extends Controller {
 
 	static $url_handlers = array(
 		'$Action' => '$Action'
 	);
 
-	/** Are compass errors actually errors, or should we just ignore them? 
-	 *  True means complain, false means don't, null means don't complain on live servers, do otherwise 
+	/** 
+	 * @var bool Are compass errors actually errors, or should we just ignore them? 
+	 * 			True means complain, false means don't, null means don't complain on live servers, do otherwise 
 	 */
 	static $errors_are_errors = null;
 	
 	/**
-	 * Set to true to force no automatic rebuilding, even if isDev() is true or flush is passed and the gems are all available
+	 * @var bool Set to true to force no automatic rebuilding, even if isDev() is true or flush is passed and the gems are all available
 	 */ 
 	static $force_no_rebuild = false;
 
 	/**
-	 * Which version of sass should we use, 2 or 3? 3 is currently not actually supported, and is here as a stub
+	 * @var float Which version of sass should we use
 	 */
-	static $sass_version = 2;
+	static $sass_version = 3;
 
-	/** What gems are required for compass to work? */
+	/** 
+	 * @var array map of required gems for each version
+	 */
 	static $required_gems = array(
 		2 => array(
 			'yard', 'maruku', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors'
 		),
+		3 => array(
+			'yard', 'maruku', 'haml' => '~> 3.0', 'compass' => '~> 0.10.6', 'compass-colors'
+		),
 		'latest' => array(
-			'yard', 'maruku', 'haml', 'compass'
+			'yard', 'maruku', 'haml-edge', 'compass'
 		)
 	);
 	
-	/** Internal cache variable - is the version of rubygems currently available good enough? */
+	/** 
+	 * @var bool Internal cache variable - is the version of rubygems currently available good enough? 
+	 */
 	static $check_gems_result = null;
 	
 	protected function checkGems() {
@@ -285,8 +296,11 @@ relative_assets = true
  *
  * Rebuild on request happens if sapphire is in dev mode or flush is passed as a GET variable, except when
  * Compass::$force_no_rebuild is true, or we're currently running a test
+ *
+ * @package compass
  */
 class Compass_RebuildDecorator extends DataObjectDecorator {
+	
 	function contentcontrollerInit($controller) {
 		// Don't auto-rebuild if explicitly disabled
 		if (Compass::$force_no_rebuild) return;

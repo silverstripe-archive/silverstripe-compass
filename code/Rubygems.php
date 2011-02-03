@@ -70,6 +70,7 @@ class Rubygems extends Object {
 	
 	/**
 	 * Make sure a gem is available
+	 *
 	 * @param $gem string - the name of the gem to install
 	 * @param $version string - the specific version to install
 	 * @param $tryupdating bool - if the gem is present, check for update? (hits the internet, so slow)
@@ -105,6 +106,7 @@ class Rubygems extends Object {
 	
 	/**
 	 * Execute a command provided by a gem
+	 *
 	 * @param $gem string | array - the name of the gem, or an array of names of gems, possibly associated with versions, to require
 	 * @param $command string - the name of the command
 	 * @param $args string - arguments to pass to the command

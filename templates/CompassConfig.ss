@@ -12,7 +12,7 @@ javascripts_dir = "javascript"
 output_style = :compact
 
 sass_options = {
-  :cache_location => $TmpPath 
+  :cache_location => "$TmpDir"
 } 
 
 # To enable relative paths to assets via compass helper functions. Uncomment:

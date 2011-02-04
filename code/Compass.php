@@ -287,7 +287,7 @@ class Compass extends Controller {
 			file_put_contents(
 				$dir . DIRECTORY_SEPARATOR . 'config.rb', 
 				$this->customise(new ArrayData(array(
-					'TmpDir' => TEMP_FOLDER
+					'TmpDir' => Controller::join_links(TEMP_FOLDER, '.sass-cache')
 				)))->renderWith('CompassConfig')
 			);
 		}

@@ -43,7 +43,7 @@ class Rubygems extends Object {
 		$stderr = "";
 		 
 		if (!is_resource($process)) return -1;
-		 
+
 		fclose($pipes[0]); // close child's input immediately
 		stream_set_blocking($pipes[1],false);
 		stream_set_blocking($pipes[2],false);

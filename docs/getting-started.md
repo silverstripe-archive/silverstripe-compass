@@ -1,7 +1,60 @@
+# Getting Started
 
-## Getting Started
+Sass has two syntaxes. The new main syntax (as of Sass 3) is known as "SCSS" (for "Sassy CSS"), and is a superset of 
+CSS3's syntax. This means that every valid CSS3 stylesheet is valid SCSS as well. SCSS files use the extension .scss.
 
-### Convert your theme to sass
+The second, older syntax is known as the indented syntax (or just "Sass"). Inspired by Haml’s terseness, it’s intended 
+for people who prefer conciseness over similarity to CSS. Instead of brackets and semicolons, it uses the indentation 
+of lines to specify blocks. Although no longer the primary syntax, the indented syntax will continue to be supported. 
+Files in the indented syntax use the extension .sass.
+
+The module provides support for both but no matter what variation you wish to use the folder should be called `sass`.
+
+If you wish to use scss syntax make sure your file extension is `.scss`. If you wish to use sass use the file
+extension `.sass` on your files.
+
+## How Compass Works
+
+The module watches for any changes in your theme or modules `sass/` directory and if it detects changes it recompiles
+your `.sass` or `.scss` file into a valid `.css` file.
+
+Take for instance the following module called `cms`. You need to create a directory `sass`. This is where you will 
+write your sass files.
+
+	cms/
+		sass/
+			styles.scss
+			reset.scss
+		css/
+			
+You should make all your changes in the `sass` directory then the next time you visit your website Compass will
+generate the actual css files for you.
+
+	cms/
+		sass/
+			styles.scss
+			reset.scss
+		css/
+			styles.css
+			reset.css
+			
+You can then link to the paths of the CSS file generated.
+
+
+## Rebuild Compass Files Manually
+
+The task `dev/compass/rebuild` rebuilds all Compass themes and modules. You can pass --theme=themename or 
+--module=modulename to just rebuild a specific theme or module. In devmode this is automatic.
+
+Rebuilding a theme via sake:
+
+	sake dev/compass/rebuild --theme=blackcandy
+
+Rebuilding a module via sake:
+	
+	sake dev/compass/rebuild --module=cms
+ 
+## Convert your theme to sass
 
 	sapphire/sake dev/compass/convert --theme=blackcandy
 
@@ -14,7 +67,7 @@ we force the recompile of all css files.
 
 The original css files are still available at css/.backup
 
-## WARNING
+**WARNING**
 
 Once you've converted a theme to Compass, the css files in the css directory will be automatically overwritten by 
 the compiled sass. It is not recommended to mix sass-compiled and non-compiled css in the same directory
@@ -26,30 +79,17 @@ the compiled sass. It is not recommended to mix sass-compiled and non-compiled c
 The task dev/compass/convert creates the required config.rb file to mark a theme or module as being compass based, 
 and converts any existing css files into sass files
 
-You need to pass --theme=themename or --module=modulename to specify which theme or module to convert
+Converting a theme:
+
+	sake dev/compass/convert --theme=blackcandy
+
+Converting a module:
+	
+	sake dev/compass/convert --module=cms
 
 By default, if there are any sass files already present, the conversion is aborted. You can pass --force to convert 
 anyway, overwriting any existing sass files.
 
-### Rebuild one or all themes & modules from the command line
-
-The task dev/compass/rebuild rebuilds all Compass themes and modules. You can pass --theme=themename or 
---module=modulename to just rebuild a specific theme or module
-
-### Update your gems to the latest version
-
-When rebuild is triggered, the module will download the latest version of Compass if it is not present. Once it has 
-downloaded Compass it will not re-check to see if a new version is available (for speed).
-
-To force updating Compass to the lastest version, use the updategems action
-
-sapphire/sake dev/compass/updategems
-
-### Share the Compass gem amongst several websites
-
-By default the module installed Compass into the sites temporary directory. This means that each site will have 
-it's own copy of the gems, and that any temp clearing will remove the gems. You can set the constant `SS_GEM_PATH` 
-to a common path.
 
 ### Change error handling
 
@@ -62,8 +102,8 @@ who will not be doing sass edits.
 
 ### Un-compassing a theme or module
 
-The Compass module uses the presence of a config.rb file to detect the location of Compass-based themes and modules. 
-Remove the config.rb file to stop that theme or module from being automatically rebuilt.
+The Compass module uses the presence of a `config.rb` file to detect the location of Compass-based themes and modules. 
+Remove the `config.rb` file to stop that theme or module from being automatically rebuilt.
 
 ### Base rewriting
 

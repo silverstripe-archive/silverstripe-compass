@@ -11,7 +11,7 @@ class Compass extends Controller {
 
 	/** 
 	 * @var bool Are compass errors actually errors, or should we just ignore them? 
-	 * 			True means complain, false means don't, null means don't complain on live servers, do otherwise 
+	 *			True means complain, false means don't, null means don't complain on live servers, do otherwise 
 	 */
 	static $errors_are_errors = null;
 	
@@ -33,10 +33,10 @@ class Compass extends Controller {
 			'yard', 'maruku', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors'
 		),
 		3 => array(
-			'yard', 'maruku', 'haml' => '~> 3.0', 'compass' => '~> 0.10.6', 'compass-colors'
+			'yard', 'maruku', 'haml-edge' => '~> 3.0', 'compass' => '~> 0.10.6', 'compass-colors' // requires edge as it has scss support
 		),
 		'latest' => array(
-			'yard', 'maruku', 'haml-edge', 'compass'
+			'yard', 'maruku', 'haml-edge', 'compass', 'compass-colors'
 		)
 	);
 	
@@ -113,31 +113,15 @@ class Compass extends Controller {
 			exit();
 		}
 		
-		// And doesn't have sass or compass commands in it
-		if (is_file($dir . DIRECTORY_SEPARATOR . 'config.rb') || is_dir($dir . DIRECTORY_SEPARATOR . 'sass')) {
+		// And doesn't have sass  commands in it
+		if(is_dir($dir . DIRECTORY_SEPARATOR . 'sass')) {
 			if (!@$_GET['force'] && array_search('--force', (array)@$_GET['args']) === false) {
 				echo "\nERROR:\n\nPath $dir is already a compass or sass based theme or module.\nUse --force to force overwriting\n\n";
 				exit();
 			}
 		}
 		
-		// Create the config.rb file to configure compass
-		// @todo Allow tweaking this definition via command line arguments
-		file_put_contents($dir . DIRECTORY_SEPARATOR . 'config.rb', '
-# Require any additional compass plugins here.
-require "compass-colors"
-
-project_type = :stand_alone
-# Set this to the root of your project when deployed:
-http_path = "/"
-css_dir = "css"
-sass_dir = "sass"
-images_dir = "images"
-javascripts_dir = "javascript"
-output_style = :compact
-# To enable relative paths to assets via compass helper functions. Uncomment:
-relative_assets = true
-');
+		self::generate_config($dir);
 		
 		// Make sure the gems we need are available
 		if (($error = $this->checkGems()) !== true) return self::error($error);
@@ -219,7 +203,6 @@ relative_assets = true
 	 * Note that errors get output independent of this argument - use errors_are_errors = false to suppress them.
 	 */
 	function rebuild($verbose = false) {
-
 		// Make sure the gems we need are available
 		if (($error = $this->checkGems()) !== true) return self::error($error);
 		
@@ -260,13 +243,18 @@ relative_assets = true
 	protected function rebuildDirectory($dir) {
 		if (!is_dir($dir)) return self::error("Could not rebuild $dir, as it doesn't exist");
 		
-		$orig = getcwd();
+		self::generate_config($dir);
 		
+		$orig = getcwd();
 		chdir($dir);
-		$code = Rubygems::run(self::$required_gems[self::$sass_version], "compass", @$_GET['flush'] ? " --force" : "", $out, $err);
+		
+		$args = (self::$sass_version > 2) ? "compile -e production ": "";
+		if(isset($_REQUEST['flush'])) $args .= "--force";
+		
+		$code = Rubygems::run(self::$required_gems[self::$sass_version], "compass",  $args, $out, $err);
 		chdir($orig);
 		
-		if ($code !== 0) return self::error($err);	
+		//if ($code !== 0) return self::error($err);	
 	}
 
 	/**
@@ -289,6 +277,21 @@ relative_assets = true
 		if ($verbose) echo "\nGem update succesfull\n";
 	}
 	
+	/**
+	 * Generate a configuration file for a given directory
+	 *
+	 * @param string - folder name
+	 */
+	protected function generate_config($dir) {
+		if(!is_file($dir . DIRECTORY_SEPARATOR . 'config.rb')) {
+			file_put_contents(
+				$dir . DIRECTORY_SEPARATOR . 'config.rb', 
+				$this->customise(new ArrayData(array(
+					'TmpDir' => TEMP_FOLDER
+				)))->renderWith('CompassConfig')
+			);
+		}
+	}
 }
 
 /**
@@ -304,9 +307,11 @@ class Compass_RebuildDecorator extends DataObjectDecorator {
 	function contentcontrollerInit($controller) {
 		// Don't auto-rebuild if explicitly disabled
 		if (Compass::$force_no_rebuild) return;
+		
 		// Don't auto-rebuild in test mode
 		$runningTest = class_exists('SapphireTest',false) && SapphireTest::is_running_test();
 		if ($runningTest) return;
+		
 		// If we are in dev mode, or flush called, auto-rebuild
 		if (Director::isDev() || @$_GET['flush']) singleton('Compass')->rebuild();
 	}

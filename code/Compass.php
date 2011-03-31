@@ -183,14 +183,23 @@ class Compass extends Controller {
 	 */
 	protected function getAllModules() {
 		$modules = array();
+		
+		if(class_exists('SS_ClassLoader')) {
+			// SilverStripe 3.x
+			$classes = SS_ClassLoader::instance()->getManifest()->getClasses();
+			$paths = array_values($classes);
+		} else {
+			// SilverStripe 2.x
+			global $_CLASS_MANIFEST;
+			$paths = $_CLASS_MANIFEST;
+		}
 
-		global $_CLASS_MANIFEST;
-		foreach ($_CLASS_MANIFEST as $path) {
+		foreach ($paths as $path) {
 			if (preg_match('#'.preg_quote(BASE_PATH, '#').'/([^/]+)/#', $path, $matches)) {
 				$modules[$matches[1]] = $matches[1];
 			}
 		}
-		
+
 		return $modules;
 	}
 	

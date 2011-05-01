@@ -179,24 +179,23 @@ class Compass extends Controller {
 
 	/**
 	 * Utility function that returns an array of all modules.
-	 * Logic taken from sapphire/dev/ModelViewer.php
+	 * 
+	 * @return array Map of module names to their path
 	 */
 	protected function getAllModules() {
 		$modules = array();
 		
 		if(class_exists('SS_ClassLoader')) {
 			// SilverStripe 3.x
-			$classes = SS_ClassLoader::instance()->getManifest()->getClasses();
-			$paths = array_values($classes);
+			$modules = SS_ClassLoader::instance()->getManifest()->getModules();
 		} else {
 			// SilverStripe 2.x
 			global $_CLASS_MANIFEST;
 			$paths = $_CLASS_MANIFEST;
-		}
-
-		foreach ($paths as $path) {
-			if (preg_match('#'.preg_quote(BASE_PATH, '#').'/([^/]+)/#', $path, $matches)) {
-				$modules[$matches[1]] = $matches[1];
+			foreach ($paths as $path) {
+				if (preg_match('#'.preg_quote(BASE_PATH, '#').'/([^/]+)/#', $path, $matches)) {
+					$modules[$matches[1]] = BASE_PATH . DIRECTORY_SEPARATOR . $matches[1];
+				}
 			}
 		}
 
@@ -214,7 +213,7 @@ class Compass extends Controller {
 	function rebuild($verbose = false) {
 		// Make sure the gems we need are available
 		if (($error = $this->checkGems()) !== true) return self::error($error);
-		
+
 		$dir = null;
 		if (@$_GET['theme']) $dir = THEMES_PATH . DIRECTORY_SEPARATOR . $_GET['theme'];
 		if (@$_GET['module']) $dir = BASE_PATH . DIRECTORY_SEPARATOR . $_GET['module'];
@@ -234,14 +233,13 @@ class Compass extends Controller {
 				}
 			}
 			
-			foreach ($this->getAllModules() as $module) {
+			foreach ($this->getAllModules() as $name => $path) {
 				// If this is in the compass module, skip
-				if ($module == 'compass') continue;
-				$dir = BASE_PATH . DIRECTORY_SEPARATOR . $module;
+				if ($name == 'compass') continue;
 				
-				if (file_exists($dir . DIRECTORY_SEPARATOR . 'config.rb')) {
-					if ($verbose) echo "\nRebuilding module: $module\n";
-					$this->rebuildDirectory($dir);
+				if (file_exists($path . DIRECTORY_SEPARATOR . 'config.rb')) {
+					if ($verbose) echo "\nRebuilding module: $name\n";
+					$this->rebuildDirectory($path);
 				}
 			}
 		}

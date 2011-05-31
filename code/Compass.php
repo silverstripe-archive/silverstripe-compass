@@ -261,7 +261,7 @@ class Compass extends Controller {
 		$code = Rubygems::run(self::$required_gems[self::$sass_version], "compass",  $args, $out, $err);
 		chdir($orig);
 		
-		//if ($code !== 0) return self::error($err);	
+		if ($code !== 0) return self::error($err);	
 	}
 
 	/**

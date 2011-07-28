@@ -23,20 +23,20 @@ class Compass extends Controller {
 	/**
 	 * @var float Which version of sass should we use
 	 */
-	static $sass_version = 3;
+	static $sass_version = '3';
 
 	/** 
 	 * @var array map of required gems for each version
 	 */
 	static $required_gems = array(
-		2 => array(
-			'yard', 'maruku', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors'
+		'2' => array(
+			'yard' => '', 'maruku' => '', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors' => ''
 		),
-		3 => array(
-			'yard', 'maruku', 'haml-edge' => '~> 3.0', 'compass' => '~> 0.10.6', 'compass-colors' // requires edge as it has scss support
+		'3' => array(
+			'yard' => '', 'maruku' => '', 'haml' => '~> 3.1', 'compass' => '~> 0.11.5', 'compass-colors' => ''
 		),
 		'latest' => array(
-			'yard', 'maruku', 'haml-edge', 'compass', 'compass-colors'
+			'yard' => '', 'maruku' => '', 'haml-edge' => '', 'compass' => '', 'compass-colors' => ''
 		)
 	);
 	
@@ -51,8 +51,11 @@ class Compass extends Controller {
 			self::$check_gems_result = true;
 			
 			foreach (self::$required_gems[self::$sass_version] as $gem => $version) {
-				if (is_numeric($gem)) { $gem = $version; $version = null; }
-				if ($error = Rubygems::require_gem($gem, $version)) self::$check_gems_result = $error;
+				if(!$version) $version = ">= 0";
+				
+				if($error = Rubygems::require_gem($gem, $version)) {
+					self::$check_gems_result = $error;
+				}
 			}
 		}
 		

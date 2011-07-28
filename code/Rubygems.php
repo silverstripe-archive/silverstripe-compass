@@ -120,13 +120,21 @@ class Rubygems extends Object {
 		if (is_string($gems)) $reqs[] = "-e 'gem \"$gem\", \">= 0\"'";
 		else {
 			foreach ($gems as $gem => $version) {
-				if (is_numeric($gem)) { $gem = $version; $version = '>= 0'; }
+				if (!$version) { 
+					$version = '>= 0'; 
+				}
+				
 				$reqs[] = "-e 'gem \"$gem\", \"$version\"'";
 			}
 		}
-
+		$version = (isset($gems[$command])) ? $gems[$command] : ">= 0";
+		
 		$reqs = implode(' ', $reqs);
 
-		return self::_run("ruby -rubygems $reqs -e 'load \"$command\"' -- $args", $out, $err);
+		return self::_run(
+			sprintf("ruby -rubygems $reqs -e 'load Gem.bin_path(\"%s\", \"%s\", \"%s\")' -- $args", $command, $command, $version), 
+			$out, 
+			$err
+		);
 	}
 }

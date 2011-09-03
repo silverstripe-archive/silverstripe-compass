@@ -165,16 +165,21 @@ class Compass extends Controller {
 	/**
 	 * Utility function that returns an array of all themes.
 	 * Logic taken from late 2.4 ManifestBuilder - kept here for 2.3 and earlier 2.4 compatibility
+	 *
+	 * @return array
 	 */
 	protected function getAllThemes() {
 		$baseDir = BASE_PATH . DIRECTORY_SEPARATOR . THEMES_DIR;
 		
 		$themes = array();
-		$dir = dir($baseDir);
 		
-		while ($file = $dir->read()) {
-			$fullPath = $baseDir . DIRECTORY_SEPARATOR . $file;
-			if (strpos($file, '.') === false && is_dir($fullPath)) $themes[$file] = $file;
+		if(is_dir($baseDir)) {
+			$dir = dir($baseDir);
+		
+			while ($file = $dir->read()) {
+				$fullPath = $baseDir . DIRECTORY_SEPARATOR . $file;
+				if (strpos($file, '.') === false && is_dir($fullPath)) $themes[$file] = $file;
+			}
 		}
 		
 		return $themes;

@@ -24,6 +24,11 @@ class Compass extends Controller {
 	 * @var float Which version of sass should we use
 	 */
 	static $sass_version = '3';
+	
+	/**
+	 * @var string - preferred syntax to use
+	 */
+	public static $syntax = "scss";
 
 	/** 
 	 * @var array map of required gems for each version
@@ -44,6 +49,14 @@ class Compass extends Controller {
 	 * @var bool Internal cache variable - is the version of rubygems currently available good enough? 
 	 */
 	static $check_gems_result = null;
+	
+	/**
+	 * Directory to store sass cache. Defaults to temp_folder/.sass.
+	 *
+	 * @see set_tmp_dir()
+	 * @var string
+	 */
+	private static $temp_dir;
 	
 	protected function checkGems() {
 		if (self::$check_gems_result === null) {
@@ -117,7 +130,7 @@ class Compass extends Controller {
 		}
 		
 		// And doesn't have sass  commands in it
-		if(is_dir($dir . DIRECTORY_SEPARATOR . 'sass')) {
+		if(is_dir($dir . DIRECTORY_SEPARATOR . self::$syntax)) {
 			if (!@$_GET['force'] && array_search('--force', (array)@$_GET['args']) === false) {
 				echo "\nERROR:\n\nPath $dir is already a compass or sass based theme or module.\nUse --force to force overwriting\n\n";
 				exit();
@@ -165,16 +178,21 @@ class Compass extends Controller {
 	/**
 	 * Utility function that returns an array of all themes.
 	 * Logic taken from late 2.4 ManifestBuilder - kept here for 2.3 and earlier 2.4 compatibility
+	 *
+	 * @return array
 	 */
 	protected function getAllThemes() {
 		$baseDir = BASE_PATH . DIRECTORY_SEPARATOR . THEMES_DIR;
 		
 		$themes = array();
-		$dir = dir($baseDir);
 		
-		while ($file = $dir->read()) {
-			$fullPath = $baseDir . DIRECTORY_SEPARATOR . $file;
-			if (strpos($file, '.') === false && is_dir($fullPath)) $themes[$file] = $file;
+		if(is_dir($baseDir)) {
+			$dir = dir($baseDir);
+		
+			while ($file = $dir->read()) {
+				$fullPath = $baseDir . DIRECTORY_SEPARATOR . $file;
+				if (strpos($file, '.') === false && is_dir($fullPath)) $themes[$file] = $file;
+			}
 		}
 		
 		return $themes;
@@ -235,7 +253,7 @@ class Compass extends Controller {
 					$this->rebuildDirectory($dir);
 				}
 			}
-			
+
 			foreach ($this->getAllModules() as $name => $path) {
 				// If this is in the compass module, skip
 				if ($name == 'compass') continue;
@@ -245,6 +263,8 @@ class Compass extends Controller {
 					$this->rebuildDirectory($path);
 				}
 			}
+			
+			
 		}
 		
 		if ($verbose) echo "\nRebuild succesfull\n";
@@ -297,10 +317,34 @@ class Compass extends Controller {
 			file_put_contents(
 				$dir . DIRECTORY_SEPARATOR . 'config.rb', 
 				$this->customise(new ArrayData(array(
-					'TmpDir' => Controller::join_links(TEMP_FOLDER, '.sass-cache')
+					'TmpDir' => self::get_temp_dir(),
+					'Mode' => self::$syntax
 				)))->renderWith('CompassConfig')
 			);
 		}
+	}
+	
+	/**
+	 * Set the temp directory for storing the compass cache. Path should be a folder
+	 * to filesystem which is writable by the web server.
+	 *
+	 * @param string
+	 */
+	public static function set_temp_dir($dir) {
+		self::$temp_dir = $dir;
+	}
+	
+	/**
+	 * Return the temp directory for storing the sass cache. Path should be writable
+	 * by the web server/
+	 *
+	 * @return string
+	 */
+	public static function get_temp_dir() {
+		if(!self::$temp_dir) 
+			return Controller::join_links(TEMP_FOLDER, '.sass-cache');
+		
+		return self::$temp_dir;
 	}
 }
 

@@ -4,6 +4,10 @@ The Compass module for SilverStripe seamlessly integrates Sass and Compass in
 SilverStripe modules and themes. You write your styles in sass, and the module 
 automatically compiles these sass files to css.
 
+Note: This does introduce a delay to your webpages while in devmode. This can
+be significant (2-10s) while compass rebuilds your project. If this delay is
+affecting you, I recommend using the compass gem directly.
+
 ## Maintainer Contact
 
 * Hamish Friedlander (hfried)
@@ -31,7 +35,7 @@ Normal usage is to commit the built css files to your version control
 repository during development. This means there are no extra software 
 requirements on the live servers.
 
-* SilverStripe 2.4
+* SilverStripe 3.0
 
 ## Documentation
 

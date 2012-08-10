@@ -1,0 +1,7 @@
+---
+Name: findrealestate
+After: framework/routes#coreroutes
+---
+Director:
+  rules:
+    'dev/compass': 'Compass'

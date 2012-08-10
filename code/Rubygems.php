@@ -1,17 +1,26 @@
 <?php
 
+/**
+ * @package compass
+ */
 class Rubygems extends Object {
 	
-	/** Internal cache variable - is ruby available? */
-	static $ruby_ok = null;
+	/** 
+	 * @var bool - is ruby available? 
+	 */
+	private static $ruby_ok = null;
 
-	/** Internal cache variable - is the version of rubygems currently available good enough? */
-	static $gem_version_ok = null;
+	/** 
+	 * @var bool - is the version of rubygems currently available good enough? 
+	 */
+	private static $gem_version_ok = null;
 	
 	/**
-	 * Get the path that gems live in, creating it if it doesn't exist 
+	 * Get the path that gems live in, creating it if it doesn't exist .
+	 *
+	 * @return string
 	 */
-	static function gem_path() {
+	private static function gem_path() {
 		$path = TEMP_FOLDER . '/gems';
 		if (defined('SS_GEM_PATH')) $path = SS_GEM_PATH;
 		
@@ -20,16 +29,19 @@ class Rubygems extends Object {
 	}
 
 	/**
-	 * Internal helper function that calls an external executable - can't just use backticks, as we want stderr and stdout as seperate variables
+	 * Internal helper function that calls an external executable - can't just 
+	 * use backticks, as we want stderr and stdout as separate variables
 	 * 
-	 * Also sets this modules gem path into the environment of the external executable
+	 * Also sets this modules gem path into the environment of the external 
+	 * executable
 	 *
 	 * @param $cmd string - the command to run
 	 * @param $stdout reference to string - the resultant stdout
 	 * @param $stderr reference to string - the resultant stderr
+	 *
 	 * @return int - process exit code, or -1 if the process couldn't be executed
 	 */
-	static protected function _run($cmd, &$stdout, &$stderr) {
+	protected static function _run($cmd, &$stdout, &$stderr) {
 		$descriptorspec = array(
 			0 => array("pipe", "r"), // stdin is a pipe that the child will read from
 			1 => array("pipe", "w"), // stdout is a pipe that the child will write to
@@ -50,11 +62,14 @@ class Rubygems extends Object {
 		 
 		while (true) {
 			$read = array();
+			$w = null;
+			$e = null;
+			
 			if (!feof($pipes[1])) $read[]= $pipes[1];
 			if (!feof($pipes[2])) $read[]= $pipes[2];
 			 
 			if (!$read) break;
-			if (!stream_select($read, $w=null, $e=null, 120)) break;
+			if (!stream_select($read, $w, $e, 120)) break;
 			 
 			foreach ($read as $r) {
 				$s = fread($r,1024);
@@ -74,24 +89,38 @@ class Rubygems extends Object {
 	 * @param $gem string - the name of the gem to install
 	 * @param $version string - the specific version to install
 	 * @param $tryupdating bool - if the gem is present, check for update? (hits the internet, so slow)
+	 *
 	 * @return null | string - an error string on error, nothing on success
 	 */
-	static function require_gem($gem, $version = null, $tryupdating = false) {
+	public static function require_gem($gem, $version = null, $tryupdating = false) {
 		// Check that ruby exists
-		if (self::$ruby_ok === null) self::$ruby_ok = (bool)`which ruby`;
+		if (self::$ruby_ok === null) {
+			self::$ruby_ok = (bool)`which ruby`;
+		}
 		
-		if (!self::$ruby_ok) return 'Ruby isn\'t present. The "ruby" command needs to be in the webserver\'s path';
+		if (!self::$ruby_ok) {
+			return 'Ruby isn\'t present. The "ruby" command needs to be in the webserver\'s path';
+		}
 		
 		// Check that rubygems exists and is a good enough version
 		if (self::$gem_version_ok === null) {
 			$code = self::_run('gem environment version', $ver, $err);
-			if ($code !== 0) return 'Ruby is present, but there was a problem accessing the current rubygems version - is rubygems available? The "gem" command needs to be in the webserver\'s path.';
+			
+			if ($code !== 0) {
+				return 'Ruby is present, but there was a problem accessing the \
+					current rubygems version - is rubygems available? The "gem" \
+					command needs to be in the webserver\'s path.';
+			}
 			
 			$vers = explode('.', $ver);
+			
 			self::$gem_version_ok = ($vers[0] >= 1 && $vers[1] >= 2);
 		}
 
-		if (!self::$gem_version_ok) return "Rubygems is too old. You have version $ver, but we need at least version 1.2. Please upgrade.";
+		if (!self::$gem_version_ok) {
+			return "Rubygems is too old. You have version $ver, but we need at \
+				least version 1.2. Please upgrade.";
+		}
 		
 		$veropt = $version ? "-v '$version'" : '';
 
@@ -100,25 +129,33 @@ class Rubygems extends Object {
 
 		if (trim($out) != 'true' || $tryupdating) {
 			$code = self::_run("gem install $gem $veropt --no-rdoc --no-ri", $out, $err);
-			if ($code !== 0) return "Could not install required gem $gem. Either manually install, or repair error. Error message was: $err";
+			
+			if ($code !== 0) {
+				return "Could not install required gem $gem. Either manually \
+					install, or repair error. Error message was: $err";
+			}
 		}
 	}
 	
 	/**
 	 * Execute a command provided by a gem
 	 *
-	 * @param $gem string | array - the name of the gem, or an array of names of gems, possibly associated with versions, to require
-	 * @param $command string - the name of the command
-	 * @param $args string - arguments to pass to the command
-	 * @param $out reference to string - stdout result of the command
-	 * @param $err reference to string - stderr result of the command
+	 * @param string | array $gem - the name of the gem, or an array of names 
+	 * of gems, possibly associated with versions, to require.
+	 *
+	 * @param string $command - the name of the command
+	 * @param string $args - arguments to pass to the command
+	 * @param string $out - stdout result of the command
+	 * @param string $err - stderr result of the command
+	 *
 	 * @return int - process exit code, or -1 if the process couldn't be executed
 	 */
-	static function run($gems, $command, $args="", &$out, &$err) {
+	public static function run($gems, $command, $args="", &$out, &$err) {
 		$reqs = array();
 
-		if (is_string($gems)) $reqs[] = "-e 'gem \"$gem\", \">= 0\"'";
-		else {
+		if (is_string($gems)) {
+			$reqs[] = "-e 'gem \"$gem\", \">= 0\"'";
+		} else {
 			foreach ($gems as $gem => $version) {
 				if (!$version) { 
 					$version = '>= 0'; 
@@ -127,12 +164,14 @@ class Rubygems extends Object {
 				$reqs[] = "-e 'gem \"$gem\", \"$version\"'";
 			}
 		}
-		$version = (isset($gems[$command])) ? $gems[$command] : ">= 0";
 		
+		$version = (isset($gems[$command])) ? $gems[$command] : ">= 0";
 		$reqs = implode(' ', $reqs);
 
 		return self::_run(
-			sprintf("ruby -rubygems $reqs -e 'load Gem.bin_path(\"%s\", \"%s\", \"%s\")' -- $args", $command, $command, $version), 
+			sprintf("ruby -rubygems $reqs -e 'load Gem.bin_path(\"%s\", \"%s\", \"%s\")' -- $args", 
+				$command, $command, $version
+			), 
 			$out, 
 			$err
 		);

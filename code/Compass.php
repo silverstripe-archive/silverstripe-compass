@@ -4,36 +4,41 @@
  * @package compass
  */
 class Compass extends Controller {
-
-	static $url_handlers = array(
+	
+	/**
+	 * @var array
+	 */
+	public static $url_handlers = array(
 		'$Action' => '$Action'
 	);
 
 	/** 
-	 * @var bool Are compass errors actually errors, or should we just ignore them? 
-	 *			True means complain, false means don't, null means don't complain on live servers, do otherwise 
+	 * @var bool Are compass errors actually errors, or should we just ignore 
+	 * them? True means complain, false means don't, null means don't complain 
+	 * on live servers, do otherwise.
 	 */
-	static $errors_are_errors = null;
+	public static $errors_are_errors = null;
 	
 	/**
-	 * @var bool Set to true to force no automatic rebuilding, even if isDev() is true or flush is passed and the gems are all available
+	 * @var bool Set to true to force no automatic rebuilding, even if isDev() 
+	 * is true or flush is passed and the gems are all available.
 	 */ 
-	static $force_no_rebuild = false;
+	public static $force_no_rebuild = false;
 
 	/**
-	 * @var float Which version of sass should we use
+	 * @var float Which version of sass should we use.
 	 */
-	static $sass_version = '3';
+	public static $sass_version = '3';
 	
 	/**
-	 * @var string - preferred syntax to use
+	 * @var string - preferred syntax to use.
 	 */
 	public static $syntax = "scss";
 
 	/** 
-	 * @var array map of required gems for each version
+	 * @var array map of required gems for each version.
 	 */
-	static $required_gems = array(
+	public static $required_gems = array(
 		'2' => array(
 			'yard' => '', 'maruku' => '', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors' => ''
 		),
@@ -46,9 +51,10 @@ class Compass extends Controller {
 	);
 	
 	/** 
-	 * @var bool Internal cache variable - is the version of rubygems currently available good enough? 
+	 * @var bool Internal cache variable - is the version of rubygems currently 
+	 * available good enough? 
 	 */
-	static $check_gems_result = null;
+	private static $check_gems_result = null;
 	
 	/**
 	 * Directory to store sass cache. Defaults to temp_folder/.sass.
@@ -57,6 +63,7 @@ class Compass extends Controller {
 	 * @var string
 	 */
 	private static $temp_dir;
+	
 	
 	protected function checkGems() {
 		if (self::$check_gems_result === null) {
@@ -87,21 +94,31 @@ class Compass extends Controller {
 		return false;
 	}
 	
-	function init() {
+	public function init() {
 		parent::init();
 		
-		// We allow access to this controller regardless of live-status or ADMIN permission only if on CLI. 
-		// Access to this controller is always allowed in "dev-mode", or of the user is ADMIN.
+		// We allow access to this controller regardless of live-status or 
+		// ADMIN permission only if on CLI. Access to this controller is 
+		// always allowed in "dev-mode", or of the user is ADMIN.
+		
 		$canAccess = (Director::isDev() || Director::is_cli() || Permission::check("ADMIN"));
-		if (!$canAccess) return Security::permissionFailure($this);
+		
+		if (!$canAccess) {
+			return Security::permissionFailure($this);
+		}
 	}
 	
 	/**
 	 * Convert a css based theme to a sass based one
 	 * 
-	 * Designed to be called as a sake command (sapphire/sake dev/compass/convert --theme=blackcandy)
+	 * Designed to be called as a sake command 
+	 *
+	 * <code>
+	 * sapphire/sake dev/compass/convert --theme=blackcandy
+	 * </code>
 	 * 
-	 * Set $verbose to anything positive to output status (calling as a controller passed HTTPRequest, which is good enough)
+	 * @param bool $verbose to anything positive to output 
+	 * status (calling as a controller passed HTTPRequest, which is good enough)
 	 */
 	function convert($verbose = false) {
 		$dir = null;
@@ -177,7 +194,6 @@ class Compass extends Controller {
 
 	/**
 	 * Utility function that returns an array of all themes.
-	 * Logic taken from late 2.4 ManifestBuilder - kept here for 2.3 and earlier 2.4 compatibility
 	 *
 	 * @return array
 	 */
@@ -226,16 +242,20 @@ class Compass extends Controller {
 	/**
 	 * Convert the sass files to css files
 	 * 
-	 * Called automatically on dev machines, and when flush=all. Can also be called as a sake command (sapphire/sake dev/compass/rebuild)
+	 * Called automatically on dev machines, and when flush=all. Can also be 
+	 * called as a sake command (sapphire/sake dev/compass/rebuild).
 	 * 
-	 * Set $verbose to anything positive to output status (calling as a controller passed HTTPRequest, which is good enough)
-	 * Note that errors get output independent of this argument - use errors_are_errors = false to suppress them.
+	 * Set $verbose to anything positive to output status (calling as a 
+	 * controller passed HTTPRequest, which is good enough).
+	 *
+	 * @param bool $verbose - use Compass::$errors_are_errors = false to suppress.
 	 */
 	function rebuild($verbose = false) {
 		// Make sure the gems we need are available
 		if (($error = $this->checkGems()) !== true) return self::error($error);
 
 		$dir = null;
+		
 		if (@$_GET['theme']) $dir = THEMES_PATH . DIRECTORY_SEPARATOR . $_GET['theme'];
 		if (@$_GET['module']) $dir = BASE_PATH . DIRECTORY_SEPARATOR . $_GET['module'];
 
@@ -263,13 +283,16 @@ class Compass extends Controller {
 					$this->rebuildDirectory($path);
 				}
 			}
-			
-			
 		}
 		
 		if ($verbose) echo "\nRebuild succesfull\n";
 	}
 	
+	/**
+	 * Rebuild the scss files from a given directory
+	 *
+	 * @param string $dir
+	 */
 	protected function rebuildDirectory($dir) {
 		if (!is_dir($dir)) return self::error("Could not rebuild $dir, as it doesn't exist");
 		
@@ -288,17 +311,21 @@ class Compass extends Controller {
 	}
 
 	/**
-	 * Make sure the compass and haml gems are up to date
+	 * Make sure the compass and haml gems are up to date.
 	 *
-	 * If the gems are not present, the system will install them automatically, but won't update them after that for speeds sake.
-	 * Call this from sake to ensure you've got the most up-to-date version 
+	 * If the gems are not present, the system will install them automatically, 
+	 * but won't update them after that for speeds sake. Call this from sake to 
+	 * ensure you've got the most up-to-date version.
 	 * 
-	 * Designed to be called as a sake command (sapphire/sake dev/compass/updategems)
+	 * Designed to be called as a sake command:
+	 * <code>
+	 * sapphire/sake dev/compass/updategems
+	 * </code>
 	 * 
-	 * Set $verbose to anything positive to output status (calling as a controller passed HTTPRequest, which is good enough)
-	 * Note that errors get output independent of this argument - use errors_are_errors = false to suppress them.
+	 * @param bool $verbose - use Compass::$errors_are_errors = false to suppress.
+	 * 
 	 */
-	function updategems($verbose = false) {
+	public function updategems($verbose = false) {
 		foreach (self::$required_gems[self::$sass_version] as $gem => $version) {
 			if (is_numeric($gem)) { $gem = $version; $version = null; }
 			if ($error = Rubygems::require_gem($gem, $version, true)) echo $error;
@@ -336,7 +363,7 @@ class Compass extends Controller {
 	
 	/**
 	 * Return the temp directory for storing the sass cache. Path should be writable
-	 * by the web server/
+	 * by the web server.
 	 *
 	 * @return string
 	 */
@@ -357,9 +384,9 @@ class Compass extends Controller {
  *
  * @package compass
  */
-class Compass_RebuildDecorator extends DataObjectDecorator {
+class Compass_RebuildDecorator extends DataExtension {
 	
-	function init() {
+	public function init() {
 		// Don't auto-rebuild if explicitly disabled
 		if (Compass::$force_no_rebuild) return;
 		
@@ -371,7 +398,7 @@ class Compass_RebuildDecorator extends DataObjectDecorator {
 		if (Director::isDev() || @$_GET['flush']) singleton('Compass')->rebuild();
 	}
 	
-	function contentcontrollerInit() {
+	public function contentcontrollerInit() {
 		return $this->init();
 	}
 }

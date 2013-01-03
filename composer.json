@@ -1,0 +1,16 @@
+{
+  "name": "silverstripe/compass",
+	"description": "The Compass module for SilverStripe seamlessly integrates Sass and Compass in SilverStripe modules and themes. You write your styles in sass, and the module automatically compiles these sass files to css.",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "compass", "sass", "css"],
+	"authors": [
+	{
+		"name": "Hamish Friedlander",
+		"email": "hamish@silverstripe.com"
+	}
+	],
+	"require":
+	{
+		"silverstripe/framework": "~2.3"
+	}
+}

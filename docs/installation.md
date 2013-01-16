@@ -18,7 +18,7 @@ For the module to install the gems you need to ensure that path is writable by t
 When the webserver cannot write to your `SS_GEM_PATH` you may need to install this manually. In a terminal run the
 following commands
 
-	gem install compass compass-colors maruku yard haml
+	gem install compass compass-colors maruku yard sass
 	
 
 ### Update your gems to the latest version

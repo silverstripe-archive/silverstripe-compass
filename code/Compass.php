@@ -43,10 +43,10 @@ class Compass extends Controller {
 			'yard' => '', 'maruku' => '', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors' => ''
 		),
 		'3' => array(
-			'yard' => '', 'maruku' => '', 'haml' => '~> 3.1', 'compass' => '~> 0.11.5', 'compass-colors' => ''
+			'yard' => '', 'maruku' => '', 'sass' => '~>3.2', 'compass' => '~> 0.12.2', 'compass-colors' => ''
 		),
 		'latest' => array(
-			'yard' => '', 'maruku' => '', 'haml-edge' => '', 'compass' => '', 'compass-colors' => ''
+			'yard' => '', 'maruku' => '', 'sass' => '', 'compass' => '', 'compass-colors' => ''
 		)
 	);
 	
@@ -311,7 +311,7 @@ class Compass extends Controller {
 	}
 
 	/**
-	 * Make sure the compass and haml gems are up to date.
+	 * Make sure the compass and sass gems are up to date.
 	 *
 	 * If the gems are not present, the system will install them automatically, 
 	 * but won't update them after that for speeds sake. Call this from sake to 

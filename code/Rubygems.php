@@ -95,7 +95,7 @@ class Rubygems extends Object {
 	public static function require_gem($gem, $version = null, $tryupdating = false) {
 		// Check that ruby exists
 		if (self::$ruby_ok === null) {
-			self::$ruby_ok = (bool)`which ruby`;
+			self::$ruby_ok = (bool)'which ruby';
 		}
 		
 		if (!self::$ruby_ok) {

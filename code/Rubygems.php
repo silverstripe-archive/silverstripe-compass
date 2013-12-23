@@ -114,7 +114,7 @@ class Rubygems extends Object {
 			
 			$vers = explode('.', $ver);
 			
-			self::$gem_version_ok = ($vers[0] >= 1 && $vers[1] >= 2);
+			self::$gem_version_ok = (($vers[0] >= 1 && $vers[1] >= 2) OR ($vers[0] >= 2));
 		}
 
 		if (!self::$gem_version_ok) {

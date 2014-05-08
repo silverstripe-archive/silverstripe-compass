@@ -43,7 +43,7 @@ class Compass extends Controller {
 			'yard' => '', 'maruku' => '', 'haml' => '~> 2.2', 'compass' => '~> 0.8.0', 'compass-colors' => ''
 		),
 		'3' => array(
-			'yard' => '', 'maruku' => '', 'sass' => '~>3.2', 'compass' => '~> 0.12.2', 'compass-colors' => ''
+			'yard' => '', 'maruku' => '', 'sass' => '~>3.3', 'compass' => '~> 1.0.0.alpha.18', 'compass-colors' => ''
 		),
 		'latest' => array(
 			'yard' => '', 'maruku' => '', 'sass' => '', 'compass' => '', 'compass-colors' => ''

@@ -37,7 +37,7 @@ class Compass extends Controller
     /**
      * @var float Which version of sass should we use.
      */
-    public static $sass_version = '3';
+    public static $sass_version = 'latest';
     
     /**
      * @var string - preferred syntax to use.
@@ -53,6 +53,9 @@ class Compass extends Controller
         ),
         '3' => array(
             'yard' => '', 'maruku' => '', 'sass' => '~>3.2', 'compass' => '~> 0.12.2', 'compass-colors' => ''
+        ),
+        '3.4' => array(
+            'yard' => '', 'maruku' => '', 'sass' => '~>3.4', 'compass' => '~>1.0', 'compass-colors' => ''
         ),
         'latest' => array(
             'yard' => '', 'maruku' => '', 'sass' => '', 'compass' => '', 'compass-colors' => ''

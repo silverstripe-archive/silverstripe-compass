@@ -9,6 +9,14 @@ class Compass extends Controller
     /**
      * @var array
      */
+    private static $allowed_actions = array(
+		'convert',
+		'rebuild'
+	);
+
+    /**
+     * @var array
+     */
     public static $url_handlers = array(
         '$Action' => '$Action'
     );

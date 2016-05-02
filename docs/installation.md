@@ -13,6 +13,12 @@ either your `_ss_environment.php` or `_config.php`.
 	
 For the module to install the gems you need to ensure that path is writable by the webserver
 
+## Sass version (optional)
+
+Define required Sass version (2, 3, 3.4, latest) to install in `mysite/_config.php`, e.g.:
+
+    Compass::$sass_version = '3.4';
+
 ## Installing the gems manually
 
 When the webserver cannot write to your `SS_GEM_PATH` you may need to install this manually. In a terminal run the

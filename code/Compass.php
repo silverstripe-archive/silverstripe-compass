@@ -9,6 +9,14 @@ class Compass extends Controller
     /**
      * @var array
      */
+    private static $allowed_actions = array(
+		'convert',
+		'rebuild'
+	);
+
+    /**
+     * @var array
+     */
     public static $url_handlers = array(
         '$Action' => '$Action'
     );
@@ -29,7 +37,7 @@ class Compass extends Controller
     /**
      * @var float Which version of sass should we use.
      */
-    public static $sass_version = '3';
+    public static $sass_version = 'latest';
     
     /**
      * @var string - preferred syntax to use.
@@ -45,6 +53,9 @@ class Compass extends Controller
         ),
         '3' => array(
             'yard' => '', 'maruku' => '', 'sass' => '~>3.2', 'compass' => '~> 0.12.2', 'compass-colors' => ''
+        ),
+        '3.4' => array(
+            'yard' => '', 'maruku' => '', 'sass' => '~>3.4', 'compass' => '~>1.0', 'compass-colors' => ''
         ),
         'latest' => array(
             'yard' => '', 'maruku' => '', 'sass' => '', 'compass' => '', 'compass-colors' => ''
@@ -290,7 +301,7 @@ class Compass extends Controller
             $this->rebuildDirectory($dir);
         } else {
             if ($verbose) {
-                echo "\nRebuilding all\n";
+                echo "\nRebuilding all<br>\n";
             }
             
             foreach ($this->getAllThemes() as $theme) {
@@ -298,7 +309,7 @@ class Compass extends Controller
                 
                 if (file_exists($dir . DIRECTORY_SEPARATOR . 'config.rb')) {
                     if ($verbose) {
-                        echo "\nRebuilding theme: $theme\n";
+                        echo "\nRebuilding theme: $theme<br>\n";
                     }
                     $this->rebuildDirectory($dir);
                 }
@@ -310,9 +321,20 @@ class Compass extends Controller
                     continue;
                 }
                 
+                // Skip other modules
+                if ($name == 'framework') {
+                    continue;
+                }
+                if ($name == 'cms') {
+                    continue;
+                }
+                if ($name == 'admin') {
+                    continue;
+                }
+                
                 if (file_exists($path . DIRECTORY_SEPARATOR . 'config.rb')) {
                     if ($verbose) {
-                        echo "\nRebuilding module: $name\n";
+                        echo "\nRebuilding module: $name<br>\n";
                     }
                     $this->rebuildDirectory($path);
                 }

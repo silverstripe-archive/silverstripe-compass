@@ -301,7 +301,7 @@ class Compass extends Controller
             $this->rebuildDirectory($dir);
         } else {
             if ($verbose) {
-                echo "\nRebuilding all\n";
+                echo "\nRebuilding all<br>\n";
             }
             
             foreach ($this->getAllThemes() as $theme) {
@@ -309,7 +309,7 @@ class Compass extends Controller
                 
                 if (file_exists($dir . DIRECTORY_SEPARATOR . 'config.rb')) {
                     if ($verbose) {
-                        echo "\nRebuilding theme: $theme\n";
+                        echo "\nRebuilding theme: $theme<br>\n";
                     }
                     $this->rebuildDirectory($dir);
                 }
@@ -321,9 +321,20 @@ class Compass extends Controller
                     continue;
                 }
                 
+                // Skip other modules
+                if ($name == 'framework') {
+                    continue;
+                }
+                if ($name == 'cms') {
+                    continue;
+                }
+                if ($name == 'admin') {
+                    continue;
+                }
+                
                 if (file_exists($path . DIRECTORY_SEPARATOR . 'config.rb')) {
                     if ($verbose) {
-                        echo "\nRebuilding module: $name\n";
+                        echo "\nRebuilding module: $name<br>\n";
                     }
                     $this->rebuildDirectory($path);
                 }
